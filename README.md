@@ -1,7 +1,12 @@
 Captcha library fo PHP
 =================
 
-
+[![Latest Stable Version](https://poser.pugx.org/romeOz/rock-captcha/v/stable.svg)](https://packagist.org/packages/romeOz/rock-captcha)
+[![Total Downloads](https://poser.pugx.org/romeOz/rock-captcha/downloads.svg)](https://packagist.org/packages/romeOz/rock-captcha)
+[![Build Status](https://travis-ci.org/romeOz/rock-captcha.svg?branch=master)](https://travis-ci.org/romeOz/rock-captcha)
+[![HHVM Status](http://hhvm.h4cc.de/badge/romeoz/rock-captcha.svg)](http://hhvm.h4cc.de/package/romeoz/rock-captcha)
+[![Coverage Status](https://coveralls.io/repos/romeOz/rock-captcha/badge.svg?branch=master)](https://coveralls.io/r/romeOz/rock-captcha?branch=master)
+[![License](https://poser.pugx.org/romeOz/rock-captcha/license.svg)](https://packagist.org/packages/romeOz/rock-captcha)
 
 Features
 -------------------
@@ -45,12 +50,13 @@ $captcha->getCode(); // output: <code>
 
 Write to session:
 
-Required install [Rock Session](https://github.com/romeOz/rock-session) 
+Required install [Rock Session](https://github.com/romeOz/rock-session).
 
 `composer require romeoz/rock-session`
 
-```php
+Example:
 
+```php
 $config = [
     'session' => new \rock\session\Session
 ];
