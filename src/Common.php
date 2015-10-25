@@ -3,18 +3,57 @@
 namespace rock\captcha;
 
 
+use rock\base\ObjectInterface;
+use rock\base\ObjectTrait;
 use rock\session\Session;
 use rock\session\SessionInterface;
 
 
-trait CommonTrait
+abstract class Common implements ObjectInterface
 {
+    use ObjectTrait {
+        ObjectTrait::__construct as parentConstruct;
+    }
+    /**
+     * The length of the captcha code.
+     * @var int
+     */
+    public $length;
+    /**
+     * The character set to use for generating the captcha code.
+     * @var string
+     */
+    public $charset = 'ABCDEFGHKLMNPRSTUVWYZabcdefghklmnprstuvwyz23456789';
+    /**
+     * Width image.
+     * @var int
+     */
+    public $width = 160;
+    /**
+     * Height image.
+     * @var int
+     */
+    public $height = 80;
+    /**
+     * JPEG quality of image.
+     *
+     * @var int
+     */
+    public $quality = 90;
+    public $backgroundColor = [];
     /** @var  Session */
     public $session = 'session';
     /**
      * @var string the name of the session key. Defaults to `_captcha`.
      */
     public $sessionKey = '_captcha';
+    /**
+     * Code of captcha.
+     *
+     * @var string
+     */
+    protected $code;
+    protected $data;
 
     /**
      * Returns data image.

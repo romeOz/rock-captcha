@@ -1,8 +1,13 @@
 <?php
 namespace rockunit;
 
+use rock\captcha\CaptchaInterface;
+
 abstract class Common extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var CaptchaInterface
+     */
     protected $captcha;
 
     public function testGet()

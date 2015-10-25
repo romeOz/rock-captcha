@@ -1,28 +1,16 @@
 <?php
 namespace rock\captcha;
 
-use rock\base\BaseException;
-use rock\base\ObjectInterface;
-use rock\base\ObjectTrait;
-use rock\helpers\Helper;
+use rock\base\BaseException;;
 use rock\helpers\Instance;
 use rock\log\Log;
 
 /**
- * @author   Kruglov Sergei (fork by RomeOz)
+ * @author   Kruglov Sergei (fork by romeOz)
  * @link     http://captcha.ru, http://kruglov.ru
  */
-class KCaptcha implements ObjectInterface, CaptchaInterface
+class KCaptcha extends Common implements CaptchaInterface
 {
-    use ObjectTrait;
-    use CommonTrait;
-
-    /**
-     * Do not change without changing font files.
-     *
-     * @var string
-     */
-    public $alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
     /**
      * Symbols used to draw captcha.
      *
@@ -32,27 +20,13 @@ class KCaptcha implements ObjectInterface, CaptchaInterface
      *
      * @var string
      */
-    public $allowedSymbols = '23456789abcdegikpqsvxyz';
+    public $charset = '23456789abcdegikpqsvxyz';
+
     /**
-     * Folder with fonts.
-     *
+     * Directory with fonts.
      * @var string
      */
     public $fontsDir = 'fonts';
-    /**
-     * Captcha string length.
-     * random 5 or 6 or 7
-     *
-     * @var int
-     */
-    public $length;
-    /**
-     * Captcha image size (you do not need to change it, this parameters is optimal).
-     *
-     * @var int
-     */
-    public $width = 160;
-    public $height = 80;
     /**
      * Symbol's vertical fluctuation amplitude.
      *
@@ -106,37 +80,34 @@ class KCaptcha implements ObjectInterface, CaptchaInterface
      * @var array
      */
     public $foregroundColor = [];
-    public $backgroundColor = [];
     /**
-     * JPEG quality of CAPTCHA image (bigger is better quality, but larger file size).
-     *
-     * @var int
-     */
-    public $quality = 90;
-    /**
-     * Code of captcha.
+     * Do not change without changing font files.
      *
      * @var string
      */
-    protected $code;
-    protected $data;
+    protected $alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
 
     public function init()
     {
         $this->session = Instance::ensure($this->session, '\rock\session\Session', [], false);
+        if (empty($this->length)) {
+            $this->length = mt_rand(5, 7);
+        }
+        if (empty($this->foregroundColor)) {
+            $this->foregroundColor = [mt_rand(0, 80), mt_rand(0, 80), mt_rand(0, 80)];
+        }
+        if (empty($this->backgroundColor)) {
+            $this->backgroundColor = [mt_rand(220, 255), mt_rand(220, 255), mt_rand(220, 255)];
+        }
+    }
 
-        $this->length = Helper::getValue(
-            $this->length,
-            mt_rand(5, 7)
-        );
-        $this->foregroundColor = Helper::getValue(
-            $this->foregroundColor,
-            [mt_rand(0, 80), mt_rand(0, 80), mt_rand(0, 80)]
-        );
-        $this->backgroundColor = Helper::getValue(
-            $this->backgroundColor,
-            [mt_rand(220, 255), mt_rand(220, 255), mt_rand(220, 255)]
-        );
+    /**
+     * {@inheritdoc}
+     * @return static
+     */
+    public function getProvider()
+    {
+        return $this;
     }
 
     /**
@@ -163,7 +134,7 @@ class KCaptcha implements ObjectInterface, CaptchaInterface
             while (true) {
                 $this->code = null;
                 for ($i = 0; $i < $this->length; ++$i) {
-                    $this->code .= $this->allowedSymbols{mt_rand(0, strlen($this->allowedSymbols) - 1)};
+                    $this->code .= $this->charset{mt_rand(0, strlen($this->charset) - 1)};
                 }
                 if (!preg_match('/cp|cb|ck|c6|c9|rn|rm|mm|co|do|cl|db|qp|qb|dp|ww/', $this->code)) {
                     break;

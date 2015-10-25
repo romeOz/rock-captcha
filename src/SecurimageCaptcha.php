@@ -3,66 +3,43 @@
 namespace rock\captcha;
 
 
-use rock\base\ObjectTrait;
 use rock\helpers\Instance;
+use Securimage;
 use Securimage_Color;
 
-class SecurimageCaptcha extends \Securimage
+class SecurimageCaptcha extends Common implements CaptchaInterface
 {
-    use ObjectTrait {
-        ObjectTrait::__construct as parentConstruct;
-    }
-
-    use CommonTrait;
-
     /**
-     * Captcha image size.
-     *
-     * @var int
+     * @var \Securimage
      */
-    public $width = 160;
-    public $height = 80;
-    public $backgroundColor = [255, 255, 255];
-    public $length;
+    protected $provider;
 
-    protected $no_session = true;
-    protected $no_exit = true;
-    protected $send_headers = false;
-    protected $gdnoisecolor;
-    /**
-     * Code of captcha.
-     *
-     * @var string
-     */
-    protected $code;
-    protected $data;
-
-    public function __construct($config = [])
+    public function init()
     {
-        $this->parentConstruct($config);
-
+        $this->session = Instance::ensure($this->session, '\rock\session\Session', [], false);
+        if (empty($this->backgroundColor)) {
+            $this->backgroundColor = [mt_rand(220, 255), mt_rand(220, 255), mt_rand(220, 255)];
+        }
         list($red, $green, $blue) = $this->backgroundColor;
-        parent::__construct([
+        $this->provider = new Securimage([
             'image_width' => $this->width,
             'image_height' => $this->height,
             'image_bg_color' => new Securimage_Color($red, $green, $blue),
-            'code_length' => isset($this->length) ? $this->length : mt_rand(5, 7)
+            'code_length' => $this->length ? : mt_rand(5, 7),
+            'charset' => $this->charset,
+            'no_session' => true,
+            'no_exit' => true,
+            'send_headers' => false,
         ]);
-        $this->session = Instance::ensure($this->session, '\rock\session\Session', [], false);
     }
 
     /**
-     * Returns code a captcha.
-     *
-     * @param bool $generate
-     * @return null|string
+     * {@inheritdoc}
+     * @return Securimage
      */
-    public function getCode($generate = false, $returnExisting = false)
+    public function getProvider()
     {
-        if (!$this->get($generate)) {
-            return null;
-        }
-        return $this->code;
+        return $this->provider;
     }
 
     /**
@@ -73,11 +50,11 @@ class SecurimageCaptcha extends \Securimage
         if (!empty($this->data) && $generate === false) {
             return $this->data;
         }
-        switch ($this->image_type) {
-            case self::SI_IMAGE_JPEG:
+        switch ($this->provider->image_type) {
+            case Securimage::SI_IMAGE_JPEG:
                 $this->data['mimeType'] = 'image/jpeg';
                 break;
-            case self::SI_IMAGE_GIF:
+            case Securimage::SI_IMAGE_GIF:
                 $this->data['mimeType'] = 'image/gif';
                 break;
             default:
@@ -86,8 +63,9 @@ class SecurimageCaptcha extends \Securimage
         }
 
         ob_start();
-        $this->show();
+        $this->provider->show();
         $this->data['image'] = ob_get_clean();
+        $this->code = $this->provider->getCode([], true);
         return $this->data;
     }
 }

@@ -15,6 +15,11 @@ interface CaptchaInterface
     const BASE64 = 2;
 
     /**
+     * Returns captcha provider.
+     */
+    public function getProvider();
+
+    /**
      * Returns data image.
      *
      * @param bool $generate

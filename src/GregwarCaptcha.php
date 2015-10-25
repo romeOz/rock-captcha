@@ -4,50 +4,33 @@ namespace rock\captcha;
 
 
 use Gregwar\Captcha\CaptchaBuilder;
-use rock\base\ObjectInterface;
-use rock\base\ObjectTrait;
 use rock\helpers\Instance;
 
-class GregwarCaptcha extends CaptchaBuilder implements ObjectInterface, CaptchaInterface
+class GregwarCaptcha extends Common implements CaptchaInterface
 {
-    use ObjectTrait {
-        ObjectTrait::__construct as parentConstruct;
-    }
-    use CommonTrait;
-
     /**
-     * Width image.
-     * @var int
+     * @var CaptchaBuilder
      */
-    public $width = 160;
-    /**
-     * Height image.
-     * @var int
-     */
-    public $height = 80;
-    /**
-     * JPEG quality of image.
-     *
-     * @var int
-     */
-    public $quality = 90;
+    protected $provider;
 
-    public $backgroundColor;
-
-    /**
-     * Code of captcha.
-     *
-     * @var string
-     */
-    protected $code;
-    protected $background;
-    protected $data;
-
-    public function __construct($config = [])
+    public function init()
     {
-        parent::__construct();
-        $this->parentConstruct($config);
         $this->session = Instance::ensure($this->session, '\rock\session\Session', [], false);
+
+        $this->provider = new CaptchaBuilder($this->generatePhrase());
+        if (!empty($this->backgroundColor)) {
+            list($red, $green, $blue) = $this->backgroundColor;
+            $this->provider->setBackgroundColor($red, $green, $blue);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     * @return CaptchaBuilder
+     */
+    public function getProvider()
+    {
+        return $this->provider;
     }
 
     protected function generate($generate = false)
@@ -55,12 +38,28 @@ class GregwarCaptcha extends CaptchaBuilder implements ObjectInterface, CaptchaI
         if (!empty($this->data) && $generate === false) {
             return $this->data;
         }
-        $this->build($this->width, $this->height);
-
-        $this->code = $this->getPhrase();
+        $this->provider->build($this->width, $this->height);
+        $this->code = $this->provider->getPhrase();
         return $this->data = [
             'mimeType' => 'image/jpeg',
-            'image' => parent::get($this->quality)
+            'image' => $this->provider->get($this->quality)
         ];
+    }
+
+    /**
+     * Generates random phrase of given length with given charset.
+     * @return string
+     */
+    protected function generatePhrase()
+    {
+        $phrase = '';
+        $length = $this->length ? : mt_rand(5, 7);
+        $chars = str_split($this->charset);
+
+        for ($i = 0; $i < $length; $i++) {
+            $phrase .= $chars[array_rand($chars)];
+        }
+
+        return $phrase;
     }
 }
