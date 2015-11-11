@@ -3,7 +3,6 @@
 namespace rock\captcha;
 
 
-use rock\helpers\Instance;
 use Securimage;
 use Securimage_Color;
 
@@ -16,7 +15,7 @@ class SecurimageCaptcha extends Common implements CaptchaInterface
 
     public function init()
     {
-        $this->session = Instance::ensure($this->session, '\rock\session\Session', [], false);
+        parent::init();
         if (empty($this->backgroundColor)) {
             $this->backgroundColor = [mt_rand(220, 255), mt_rand(220, 255), mt_rand(220, 255)];
         }
@@ -26,7 +25,7 @@ class SecurimageCaptcha extends Common implements CaptchaInterface
             'image_height' => $this->height,
             'image_bg_color' => new Securimage_Color($red, $green, $blue),
             'code_length' => $this->length ? : mt_rand(5, 7),
-            'charset' => $this->charset,
+            'charset' => $this->alphabet,
             'no_session' => true,
             'no_exit' => true,
             'send_headers' => false,

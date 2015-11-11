@@ -4,7 +4,6 @@ namespace rock\captcha;
 
 
 use Gregwar\Captcha\CaptchaBuilder;
-use rock\helpers\Instance;
 
 class GregwarCaptcha extends Common implements CaptchaInterface
 {
@@ -15,7 +14,7 @@ class GregwarCaptcha extends Common implements CaptchaInterface
 
     public function init()
     {
-        $this->session = Instance::ensure($this->session, '\rock\session\Session', [], false);
+        parent::init();
 
         $this->provider = new CaptchaBuilder($this->generatePhrase());
         if (!empty($this->backgroundColor)) {
@@ -54,7 +53,7 @@ class GregwarCaptcha extends Common implements CaptchaInterface
     {
         $phrase = '';
         $length = $this->length ? : mt_rand(5, 7);
-        $chars = str_split($this->charset);
+        $chars = str_split($this->alphabet);
 
         for ($i = 0; $i < $length; $i++) {
             $phrase .= $chars[array_rand($chars)];

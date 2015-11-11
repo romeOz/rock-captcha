@@ -1,8 +1,7 @@
 <?php
 namespace rock\captcha;
 
-use rock\base\BaseException;;
-use rock\helpers\Instance;
+use rock\base\BaseException;
 use rock\log\Log;
 
 /**
@@ -11,17 +10,21 @@ use rock\log\Log;
  */
 class KCaptcha extends Common implements CaptchaInterface
 {
+    const ALPHABET_FONT = '0123456789abcdefghijklmnopqrstuvwxyz';
+
     /**
-     * Symbols used to draw captcha.
+     * Allowed character for generating the captcha code.
      *
      * Example:
+     *
+     * ```
      *  "0123456789" digits
      *  "23456789abcdegkmnpqsuvxyz"; #alphabet without similar symbols (o=0, 1=l, i=j, t=f)
+     * ```
      *
      * @var string
      */
-    public $charset = '23456789abcdegikpqsvxyz';
-
+    public $alphabet = '23456789abcdegikpqsvxyz';
     /**
      * Directory with fonts.
      * @var string
@@ -29,28 +32,23 @@ class KCaptcha extends Common implements CaptchaInterface
     public $fontsDir = 'fonts';
     /**
      * Symbol's vertical fluctuation amplitude.
-     *
      * @var int
      */
     public $fluctuationAmplitude = 8;
     /**
      * Noise white.
-     *
-     * Defaults `0` -  no white noise.
-     *
+     * Defaults `0` - no white noise.
      * @var float
      */
     public $whiteNoiseDensity = 0;
     /**
      * Noise black.
-     * Defaults `0` -  no black noise.
-     *
+     * Defaults `0` - no black noise.
      * @var float
      */
     public $blackNoiseDensity = 0;
     /**
      * Increase safety by prevention of spaces between symbols.
-     *
      * @var bool
      */
     public $noSpaces = true;
@@ -63,8 +61,7 @@ class KCaptcha extends Common implements CaptchaInterface
     public $showCredits = false;
     /**
      * Text credit.
-     *
-     * if empty, HTTP_HOST will be shown
+     * >if empty, HTTP_HOST will be shown
      *
      * @var string
      */
@@ -80,16 +77,10 @@ class KCaptcha extends Common implements CaptchaInterface
      * @var array
      */
     public $foregroundColor = [];
-    /**
-     * Do not change without changing font files.
-     *
-     * @var string
-     */
-    protected $alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
 
     public function init()
     {
-        $this->session = Instance::ensure($this->session, '\rock\session\Session', [], false);
+        parent::init();
         if (empty($this->length)) {
             $this->length = mt_rand(5, 7);
         }
@@ -128,13 +119,14 @@ class KCaptcha extends Common implements CaptchaInterface
             }
             closedir($handle);
         }
-        $alphabet_length = strlen($this->alphabet);
+        $alphabet = self::ALPHABET_FONT;
+        $alphabet_length = strlen($alphabet);
         // generating random keystring
         do {
             while (true) {
                 $this->code = null;
                 for ($i = 0; $i < $this->length; ++$i) {
-                    $this->code .= $this->charset{mt_rand(0, strlen($this->charset) - 1)};
+                    $this->code .= $this->alphabet{mt_rand(0, strlen($this->alphabet) - 1)};
                 }
                 if (!preg_match('/cp|cb|ck|c6|c9|rn|rm|mm|co|do|cl|db|qp|qb|dp|ww/', $this->code)) {
                     break;
@@ -154,13 +146,14 @@ class KCaptcha extends Common implements CaptchaInterface
                 $i < $fontfile_width && $symbol < $alphabet_length;
                 ++$i
             ) {
+
                 $transparent = (imagecolorat($font, $i, 0) >> 24) == 127;
                 if (empty($reading_symbol) && empty($transparent)) {
-                    $font_metrics[$this->alphabet{$symbol}] = ['start' => $i];
+                    $font_metrics[$alphabet{$symbol}] = ['start' => $i];
                     $reading_symbol = true;
                     continue;
                 } elseif (!empty($reading_symbol) && !empty($transparent)) {
-                    $font_metrics[$this->alphabet{$symbol}]['end'] = $i;
+                    $font_metrics[$alphabet{$symbol}]['end'] = $i;
                     $reading_symbol = false;
                     ++$symbol;
                     continue;

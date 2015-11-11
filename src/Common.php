@@ -5,6 +5,7 @@ namespace rock\captcha;
 
 use rock\base\ObjectInterface;
 use rock\base\ObjectTrait;
+use rock\helpers\Instance;
 use rock\session\Session;
 use rock\session\SessionInterface;
 
@@ -20,10 +21,10 @@ abstract class Common implements ObjectInterface
      */
     public $length;
     /**
-     * The character set to use for generating the captcha code.
+     * Allowed character for generating the captcha code.
      * @var string
      */
-    public $charset = 'ABCDEFGHKLMNPRSTUVWYZabcdefghklmnprstuvwyz23456789';
+    public $alphabet = 'ABCDEFGHKLMNPRSTUVWYZabcdefghklmnprstuvwyz23456789';
     /**
      * Width image.
      * @var int
@@ -55,9 +56,13 @@ abstract class Common implements ObjectInterface
     protected $code;
     protected $data;
 
+    public function init()
+    {
+        $this->session = Instance::ensure($this->session, '\rock\session\Session', [], false);
+    }
+
     /**
-     * Returns data image.
-     *
+     * Returns a data image.
      * @param bool $generate
      * @return array
      */
@@ -75,8 +80,7 @@ abstract class Common implements ObjectInterface
     }
 
     /**
-     * Returns image as base64.
-     *
+     * Returns a image as base64.
      * @param bool $generate
      * @return null|string
      */
@@ -90,7 +94,7 @@ abstract class Common implements ObjectInterface
     }
 
     /**
-     * Returns image as data-uri.
+     * Returns a image as data-uri.
      * @param bool $generate
      * @return string
      */
@@ -104,7 +108,6 @@ abstract class Common implements ObjectInterface
 
     /**
      * Returns code a captcha.
-     *
      * @param bool $generate
      * @return null|string
      */
@@ -118,7 +121,6 @@ abstract class Common implements ObjectInterface
 
     /**
      * Returns code a captcha by key.
-     *
      * @return string|null
      */
     public function getSession()
@@ -128,7 +130,6 @@ abstract class Common implements ObjectInterface
 
     /**
      * Exists session.
-     *
      * @return bool
      */
     public function existsSession()
@@ -137,7 +138,6 @@ abstract class Common implements ObjectInterface
     }
     /**
      * Returns code a captcha and remove session.
-     *
      * @return string|null
      */
     public function getAndRemoveSession()
@@ -148,7 +148,7 @@ abstract class Common implements ObjectInterface
     }
 
     /**
-     * Remove session.
+     * Removes a session.
      */
     public function removeSession()
     {
@@ -156,7 +156,7 @@ abstract class Common implements ObjectInterface
     }
 
     /**
-     * Write code to session.
+     * Writes a code to session.
      * @param string $code
      */
     protected function writeSession($code)
@@ -166,7 +166,6 @@ abstract class Common implements ObjectInterface
 
     /**
      * Generate image.
-     *
      * @param bool $generate
      * @return array
      */
