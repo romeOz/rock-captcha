@@ -23,7 +23,9 @@ Installation
 
 From the Command Line:
 
-`composer require romeoz/rock-captcha`
+```
+composer require romeoz/rock-captcha
+```
 
 In your composer.json:
 
